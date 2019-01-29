@@ -18,14 +18,20 @@ const tagAttrs = obj => (content = "") =>
 
 const tag = t => {
     if (typeof t === 'string') {
-        tagAttrs({
+        return tagAttrs({
             tag: t
         })
 
     } else {
-        tagAttrs(t)
+        return tagAttrs(t)
     }
 }
+
+const tableRowTag = tag('tr')
+const tableRow = items => compose(tableRowTag, tableCells)(items)
+
+const tableCell = tag('td')
+const tableCells = items => items.map(tableCell).join('')
 
 let description = $('#description')
 let calories = $('#calories')
@@ -66,14 +72,35 @@ const validateInputs = () => {
             protein: parseInt(protein.val())
         }
         list.push(newItem)
-        console.log(list)
+        renderItems()
         cleanInputs()
+        updateTotals();
+    }
+    const updateTotals = () => {
+        let calories = 0,
+            carbs = 0,
+            protein = 0
+        list.map(item => {
+            calories += item.calories
+            carbs += item.carbs
+            protein += item.protein
+        })
+        $('#totalCalories').text(calories)
+        $('#totalCarbs').text(carbs)
+        $('#totalProteins').text(protein)
     }
     const cleanInputs = () => {
         description.val('')
         calories.val('')
         carbs.val('')
         protein.val('')
+    }
+    const renderItems = () => {
+        $('tbody').empty()
+        list.map(item => {
+            $('tbody').append(tableRow([item.description, item.calories, item.carbs, item.protein]))
+        })
+
     }
 
     if (description.val() && calories.val() && carbs.val() && protein.val()) add()
